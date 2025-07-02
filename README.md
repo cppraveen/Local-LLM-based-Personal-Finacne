@@ -113,5 +113,61 @@ See the Python code examples above.
 - Requires Ollama running locally with a Llama 3 model (e.g., `llama3:8b`).
 - See [Ollama documentation](https://ollama.com/) for setup instructions.
 
+## Security Considerations
+Running this locally doesn't mean ignoring security:
+
+- **Encrypted Storage**: Process data in memory and store results encrypted.
+- **Access Control**: Run the service on localhost only.
+- **Data Minimization**: Don't persist full transaction details after processing.
+- **Regular Cleanup**: Automate deletion of temporary files.
+
+**Expanded Example: Secure temporary file handling and encryption in Python**
+```python
+import tempfile
+import shutil
+import pandas as pd
+import json
+import os
+# from cryptography.fernet import Fernet  # Uncomment if using Fernet for encryption
+
+def run_analysis(csv_path, temp_dir):
+    # Example: Read CSV, process, and write results to a temp file
+    df = pd.read_csv(csv_path)
+    # ... perform processing ...
+    results = df.to_dict(orient='records')  # Dummy processing
+    temp_output = os.path.join(temp_dir, 'results.json')
+    with open(temp_output, 'w') as f:
+        json.dump(results, f)
+    return temp_output
+
+# Example encryption function (replace with your actual encryption logic)
+def encrypt_file(input_path, output_path, key):
+    # with open(input_path, 'rb') as f:
+    #     data = f.read()
+    # fernet = Fernet(key)
+    # encrypted = fernet.encrypt(data)
+    # with open(output_path, 'wb') as f:
+    #     f.write(encrypted)
+    pass  # Placeholder for encryption logic
+
+def process_with_cleanup(csv_path, encryption_key):
+    temp_dir = tempfile.mkdtemp()
+    try:
+        # Process data and write to temp file
+        temp_output = run_analysis(csv_path, temp_dir)
+        # Encrypt the output before saving permanently
+        encrypted_output = temp_output + '.enc'
+        encrypt_file(temp_output, encrypted_output, encryption_key)
+        print(f"Encrypted results saved to: {encrypted_output}")
+        return encrypted_output
+    finally:
+        # Always cleanup temp files
+        shutil.rmtree(temp_dir)
+
+# Usage example:
+# key = Fernet.generate_key()
+# process_with_cleanup('transactions.csv', key)
+```
+
 ## License
 MIT 
